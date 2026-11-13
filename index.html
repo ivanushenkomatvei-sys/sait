@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KODEX.DEV — Защищенная витрина разработчика</title>
+    <title>KODEX.DEV — Облачная витрина разработчика</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
@@ -15,8 +16,7 @@
                         darkBg: '#09090b',
                         cardBg: '#121217',
                         borderCol: '#27272a',
-                        accent: '#3b82f6',
-                        accentHover: '#2563eb'
+                        accent: '#3b82f6'
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -29,13 +29,9 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #09090b; color: #f4f4f5; }
         .mono { font-family: 'JetBrains Mono', monospace; }
-        .glass { background: rgba(18, 18, 23, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(39, 39, 42, 0.6); }
-        .glow:hover { box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.3); }
-        /* Кастомный скроллбар */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #09090b; }
-        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+        .glass { background: rgba(18, 18, 23, 0.75); backdrop-filter: blur(14px); border: 1px solid rgba(39, 39, 42, 0.7); }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-4px); border-color: rgba(59, 130, 246, 0.5); box-shadow: 0 12px 30px -10px rgba(59, 130, 246, 0.25); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
@@ -44,21 +40,18 @@
     <header class="sticky top-0 z-50 glass border-b border-borderCol">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="router('catalog')">
-                <div class="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-mono font-bold text-xl glow">
+                <div class="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-mono font-bold text-xl">
                     &gt;_
                 </div>
                 <div>
                     <span class="font-mono font-bold text-xl tracking-tight text-white">KODEX<span class="text-blue-500">.DEV</span></span>
-                    <span class="block text-[10px] text-zinc-400 uppercase tracking-widest font-mono">Secure Showcase</span>
+                    <span class="block text-[10px] text-zinc-400 uppercase tracking-widest font-mono">Cloud Synced Showcase</span>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-4">
-                <button onclick="router('catalog')" class="text-sm font-medium text-zinc-300 hover:text-white transition px-3 py-2 rounded-lg hover:bg-zinc-800/50">Проекты</button>
-                
-                <div id="authNavArea" class="flex items-center space-x-3">
-                    <!-- Заполняется динамически -->
-                </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="router('catalog')" class="text-sm font-medium text-zinc-300 hover:text-white transition px-3 py-2 rounded-lg hover:bg-zinc-800/50">Витрина</button>
+                <div id="authNavArea" class="flex items-center space-x-2"></div>
             </div>
         </div>
     </header>
@@ -71,80 +64,70 @@
             <div class="glass rounded-2xl p-8 sm:p-12 relative overflow-hidden border border-borderCol">
                 <div class="absolute -right-20 -top-20 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
                 <div class="relative z-10 max-w-2xl">
-                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-mono mb-4">
-                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span>Эксклюзивные разработки</span>
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono mb-4">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Cloud Sync Active • Read-Only Showcase</span>
                     </div>
                     <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4 font-mono">
                         Инженерные решения & софт
                     </h1>
                     <p class="text-zinc-400 text-base sm:text-lg">
-                        Персональная витрина программного обеспечения, скриптов и автоматизированных систем. Только авторский код.
+                        Авторские скрипты, боты и программные инструменты. Все проекты синхронизируются в реальном времени.
                     </p>
                 </div>
             </div>
 
-            <!-- Сетка проектов -->
             <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Рендерится через JS -->
+                <div class="col-span-full text-center py-16 text-zinc-500 font-mono">Загрузка проектов из облака...</div>
             </div>
         </section>
 
-        <!-- АДМИН-ПАНЕЛЬ (Строго по секретному паролю) -->
+        <!-- АДМИН-ПАНЕЛЬ -->
         <section id="view-admin" class="hidden space-y-8">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardBg p-6 rounded-2xl border border-borderCol">
                 <div>
-                    <h2 class="text-2xl font-bold font-mono text-white flex items-center gap-2">
-                        <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                        Панель администратора
-                    </h2>
-                    <p class="text-sm text-zinc-400">Управление проектами витрины</p>
+                    <h2 class="text-2xl font-bold font-mono text-white">Панель администратора</h2>
+                    <p class="text-sm text-zinc-400">Изменения сразу увидят все посетители с любых устройств</p>
                 </div>
-                <button onclick="openAddProjectModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-blue-600/20">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    Добавить проект
+                <button onclick="openProjectModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-5 py-2.5 rounded-xl transition flex items-center gap-2 shadow-lg shadow-blue-600/20">
+                    + Добавить проект
                 </button>
             </div>
 
-            <!-- Список проектов админа -->
             <div class="glass rounded-2xl p-6 border border-borderCol">
-                <h3 class="text-lg font-mono font-semibold text-white mb-4">Опубликованные проекты</h3>
-                <div id="adminProjectsList" class="space-y-4">
-                    <!-- Рендерится через JS -->
-                </div>
+                <h3 class="text-lg font-mono font-semibold text-white mb-4">Проекты в облачной базе</h3>
+                <div id="adminProjectsList" class="space-y-3"></div>
             </div>
         </section>
 
     </main>
 
-    <!-- МОДАЛЬНОЕ ОКНО АВТОРИЗАЦИИ / ВХОДА АДМИНА -->
+    <!-- МОДАЛЬНОЕ ОКНО ВХОДА АДМИНА -->
     <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
         <div class="glass max-w-md w-full mx-4 p-8 rounded-2xl border border-borderCol relative shadow-2xl">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">&times;</button>
-            <h3 id="authModalTitle" class="text-2xl font-bold font-mono text-white mb-6">Вход в систему</h3>
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white text-xl">&times;</button>
+            <h3 class="text-2xl font-bold font-mono text-white mb-2">Вход администратора</h3>
+            <p class="text-xs text-zinc-400 mb-6 font-mono">Авторизация через защищенный сервер Supabase</p>
             
-            <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-mono text-zinc-400 mb-1 uppercase">Логин / Email</label>
-                    <input type="text" id="authUsername" required class="w-full bg-zinc-900 border border-borderCol rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 font-mono text-sm">
+                    <label class="block text-xs font-mono text-zinc-400 mb-1 uppercase">Email администратора</label>
+                    <input type="email" id="adminEmail" required class="w-full bg-zinc-900 border border-borderCol rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 font-mono text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-mono text-zinc-400 mb-1 uppercase">Пароль / Мастер-ключ админа</label>
-                    <input type="password" id="authPassword" required class="w-full bg-zinc-900 border border-borderCol rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 font-mono text-sm">
+                    <label class="block text-xs font-mono text-zinc-400 mb-1 uppercase">Пароль</label>
+                    <input type="password" id="adminPassword" required class="w-full bg-zinc-900 border border-borderCol rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 font-mono text-sm">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-xl transition shadow-lg shadow-blue-600/20">Войти</button>
+                <button type="submit" id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-xl transition">Войти в панель</button>
             </form>
-            <div class="mt-4 text-center">
-                <button onclick="toggleAuthMode()" id="authSwitchBtn" class="text-xs text-zinc-400 hover:text-blue-400 transition">Нет аккаунта? Зарегистрироваться</button>
-            </div>
         </div>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО ДОБАВЛЕНИЯ ПРОЕКТА -->
+    <!-- МОДАЛЬНОЕ ОКНО ДОБАВЛЕНИЯ / РЕДАКТИРОВАНИЯ ПРОЕКТА -->
     <div id="projectModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
         <div class="glass max-w-lg w-full mx-4 p-8 rounded-2xl border border-borderCol relative shadow-2xl">
-            <button onclick="closeProjectModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">&times;</button>
-            <h3 class="text-2xl font-bold font-mono text-white mb-6">Добавить проект</h3>
+            <button onclick="closeProjectModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white text-xl">&times;</button>
+            <h3 id="projectModalTitle" class="text-2xl font-bold font-mono text-white mb-6">Новый проект</h3>
             
             <form onsubmit="saveProject(event)" class="space-y-4">
                 <input type="hidden" id="editProjectId">
@@ -153,43 +136,51 @@
                     <input type="text" id="projTitle" required class="w-full bg-zinc-900 border border-borderCol rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 font-mono text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-mono text-zinc-400 mb-1 uppercase">Категория / Стек</label>
-                    <input type="text" id="projStack" placeholder="Python, Telegram API, FastAPI" required class="w-full bg-zinc-900 border border-borderCol rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 font-mono text-sm">
+                    <label class="block text-xs font-mono text-zinc-400 mb-1 uppercase">Стек технологий</label>
+                    <input type="text" id="projStack" placeholder="Python, FastAPI, Docker" required class="w-full bg-zinc-900 border border-borderCol rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 font-mono text-sm">
                 </div>
                 <div>
                     <label class="block text-xs font-mono text-zinc-400 mb-1 uppercase">Описание</label>
                     <textarea id="projDesc" rows="3" required class="w-full bg-zinc-900 border border-borderCol rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 font-mono text-sm"></textarea>
                 </div>
                 <div>
-                    <label class="block text-xs font-mono text-zinc-400 mb-1 uppercase">Ссылка на репозиторий / исходник</label>
+                    <label class="block text-xs font-mono text-zinc-400 mb-1 uppercase">Ссылка на GitHub / Демо</label>
                     <input type="url" id="projLink" placeholder="https://github.com/..." required class="w-full bg-zinc-900 border border-borderCol rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 font-mono text-sm">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-xl transition shadow-lg shadow-blue-600/20">Сохранить проект</button>
+                <button type="submit" id="saveProjBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-xl transition">Опубликовать в облако</button>
             </form>
         </div>
     </div>
 
-    <!-- СКРИПТ ЛОГИКИ И ЗАЩИТЫ -->
     <script>
-        // Секретный мастер-пароль и логин администратора (только вы знаете его)
-        const ADMIN_USERNAME = "admin";
-        const ADMIN_SECRET_KEY = "MatveiSecret2026!"; // Измените при желании на свой сложный пароль
+        // =========================================================================
+        // ВСТАВЬТЕ СЮДА ВАШИ ДАННЫЕ ИЗ SUPABASE (Project Settings -> API)
+        // =========================================================================
+        const SUPABASE_URL = 'https://supabase.com/dashboard/project/bntjqrzciaefvkufrgls/auth/users';
+        const SUPABASE_ANON_KEY = 'sb_publishable_ypn0Eo0OPKAymg84pmy73g_3XAZTU8e';
+        // =========================================================================
 
-        // Начальные демо-проекты
-        let projects = JSON.parse(localStorage.getItem('kodex_projects')) || [
-            { id: 1, title: 'Telegram Automation Bot', stack: 'Python, Telebot, SQLite', desc: 'Многопоточный бот для автоматизации задач с админ-панелью.', link: 'https://github.com' },
-            { id: 2, title: 'Highload Web Scraper', stack: 'Node.js, Puppeteer, Redis', desc: 'Парсер для сбора данных с защищенных сайтов с обходом капч.', link: 'https://github.com' }
-        ];
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let projects = [];
+        let currentSession = null;
 
-        let currentUser = JSON.parse(localStorage.getItem('kodex_current_user')) || null;
-        let isRegisterMode = false;
+        // Кастомная векторная иконка для карточек
+        const codeIconSvg = `
+            <svg class="w-8 h-8 text-blue-400" viewBox="0 0 32 32" fill="none">
+                <rect x="3" y="5" width="26" height="22" rx="4" stroke="currentColor" stroke-width="1.8" fill="rgba(59,130,246,0.08)"/>
+                <path d="M11 13L7.5 16.5L11 20M21 13L24.5 16.5L21 20M17.5 11.5L14.5 21.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>`;
 
-        function init() {
+        async function init() {
+            const { data: { session } } = await sb.auth.getSession();
+            currentSession = session;
             renderNav();
-            renderCatalog();
-            if (currentUser && currentUser.isAdmin) {
-                renderAdminProjects();
-            }
+            await loadProjects();
+
+            sb.auth.onAuthStateChange((_event, session) => {
+                currentSession = session;
+                renderNav();
+            });
         }
 
         function router(view) {
@@ -198,166 +189,171 @@
 
             if (view === 'catalog') {
                 document.getElementById('view-catalog').classList.remove('hidden');
-                renderCatalog();
             } else if (view === 'admin') {
-                if (!currentUser || !currentUser.isAdmin) {
-                    alert('Доступ запрещен! Только администратор может открывать эту панель.');
-                    router('catalog');
+                if (!currentSession) {
+                    openAuthModal();
                     return;
                 }
                 document.getElementById('view-admin').classList.remove('hidden');
-                renderAdminProjects();
+                renderAdminList();
             }
         }
 
         function renderNav() {
             const nav = document.getElementById('authNavArea');
-            if (currentUser) {
-                let adminBtn = currentUser.isAdmin ? `<button onclick="router('admin')" class="bg-blue-600/20 border border-blue-500/40 text-blue-400 px-3 py-2 rounded-lg text-sm font-mono hover:bg-blue-600/30 transition">Админка</button>` : '';
+            if (currentSession) {
                 nav.innerHTML = `
-                    ${adminBtn}
-                    <span class="text-sm font-mono text-zinc-300">${escapeHtml(currentUser.username)}</span>
+                    <button onclick="router('admin')" class="bg-blue-600/20 border border-blue-500/40 text-blue-400 px-3 py-2 rounded-lg text-sm font-mono hover:bg-blue-600/30 transition">Админ-панель</button>
                     <button onclick="logout()" class="text-sm text-red-400 hover:text-red-300 px-3 py-2 rounded-lg hover:bg-red-500/10 transition">Выйти</button>
                 `;
             } else {
                 nav.innerHTML = `
-                    <button onclick="openAuthModal(false)" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-xl transition shadow-lg shadow-blue-600/20">Войти / Админка</button>
+                    <button onclick="openAuthModal()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-mono px-4 py-2 rounded-xl border border-borderCol transition">Вход для автора</button>
                 `;
             }
+        }
+
+        async function loadProjects() {
+            const { data, error } = await sb
+                .from('projects')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                document.getElementById('projectsGrid').innerHTML = `<div class="col-span-full text-center py-12 text-red-400 font-mono">Ошибка подключения к базе: проверьте SUPABASE_URL и ключ.</div>`;
+                return;
+            }
+
+            projects = data || [];
+            renderCatalog();
+            if (currentSession) renderAdminList();
         }
 
         function renderCatalog() {
             const grid = document.getElementById('projectsGrid');
             if (projects.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-20 text-zinc-500 font-mono">Проектов пока нет. Администратор скоро их добавит.</div>`;
+                grid.innerHTML = `<div class="col-span-full text-center py-16 text-zinc-500 font-mono">Витрина пока пуста.</div>`;
                 return;
             }
 
             grid.innerHTML = projects.map(p => `
-                <div class="glass rounded-2xl p-6 border border-borderCol flex flex-col justify-between glow transition">
+                <div class="glass rounded-2xl p-6 border border-borderCol flex flex-col justify-between card-hover">
                     <div>
-                        <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="p-2.5 rounded-xl bg-zinc-900 border border-borderCol">${codeIconSvg}</div>
                             <span class="text-xs font-mono text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">${escapeHtml(p.stack)}</span>
                         </div>
                         <h3 class="text-xl font-bold font-mono text-white mb-2">${escapeHtml(p.title)}</h3>
-                        <p class="text-zinc-400 text-sm mb-6">${escapeHtml(p.desc)}</p>
+                        <p class="text-zinc-400 text-sm leading-relaxed mb-6">${escapeHtml(p.description)}</p>
                     </div>
-                    <a href="${escapeHtml(p.link)}" target="_blank" class="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-mono text-sm py-3 rounded-xl border border-borderCol transition text-center flex items-center justify-center gap-2">
-                        Исходный код / Проект &rarr;
+                    <a href="${escapeHtml(p.link)}" target="_blank" rel="noopener noreferrer" class="w-full bg-zinc-900 hover:bg-blue-600 text-white font-mono text-sm py-3 rounded-xl border border-borderCol hover:border-blue-500 transition text-center block">
+                        Открыть проект &rarr;
                     </a>
                 </div>
             `).join('');
         }
 
-        function openAuthModal(register = false) {
-            isRegisterMode = register;
-            document.getElementById('authModalTitle').innerText = register ? 'Регистрация' : 'Вход в систему';
-            document.getElementById('authSwitchBtn').innerText = register ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться';
-            document.getElementById('authModal').classList.remove('hidden');
-        }
+        function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
+        function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
 
-        function closeAuthModal() {
-            document.getElementById('authModal').classList.add('hidden');
-        }
-
-        function toggleAuthMode() {
-            isRegisterMode = !isRegisterMode;
-            document.getElementById('authModalTitle').innerText = isRegisterMode ? 'Регистрация' : 'Вход в систему';
-            document.getElementById('authSwitchBtn').innerText = isRegisterMode ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться';
-        }
-
-        function handleAuthSubmit(e) {
+        async function handleAdminLogin(e) {
             e.preventDefault();
-            const username = document.getElementById('authUsername').value.trim();
-            const password = document.getElementById('authPassword').value;
+            const btn = document.getElementById('loginBtn');
+            btn.innerText = 'Проверка...';
+            btn.disabled = true;
 
-            // Проверка на вход админа по секретному мастер-паролю
-            if (username === ADMIN_USERNAME && password === ADMIN_SECRET_KEY) {
-                currentUser = { username: ADMIN_USERNAME, isAdmin: true };
-            } else {
-                if (isRegisterMode) {
-                    currentUser = { username: username, isAdmin: false };
-                } else {
-                    // Обычный вход (если пользователь ранее регистрировался)
-                    currentUser = { username: username, isAdmin: false };
-                }
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value;
+
+            const { error } = await sb.auth.signInWithPassword({ email, password });
+
+            btn.innerText = 'Войти в панель';
+            btn.disabled = false;
+
+            if (error) {
+                alert('Ошибка входа: неверный email или пароль.');
+                return;
             }
 
-            localStorage.setItem('kodex_current_user', JSON.stringify(currentUser));
             closeAuthModal();
-            renderNav();
-            if (currentUser.isAdmin) {
-                router('admin');
-            } else {
-                router('catalog');
-            }
+            router('admin');
         }
 
-        function logout() {
-            currentUser = null;
-            localStorage.removeItem('kodex_current_user');
-            renderNav();
+        async function logout() {
+            await sb.auth.signOut();
             router('catalog');
         }
 
-        function openAddProjectModal() {
-            document.getElementById('editProjectId').value = '';
-            document.getElementById('projTitle').value = '';
-            document.getElementById('projStack').value = '';
-            document.getElementById('projDesc').value = '';
-            document.getElementById('projLink').value = '';
+        function openProjectModal(project = null) {
+            document.getElementById('editProjectId').value = project ? project.id : '';
+            document.getElementById('projTitle').value = project ? project.title : '';
+            document.getElementById('projStack').value = project ? project.stack : '';
+            document.getElementById('projDesc').value = project ? project.description : '';
+            document.getElementById('projLink').value = project ? project.link : '';
+            document.getElementById('projectModalTitle').innerText = project ? 'Редактировать проект' : 'Новый проект';
             document.getElementById('projectModal').classList.remove('hidden');
         }
 
-        function closeProjectModal() {
-            document.getElementById('projectModal').classList.add('hidden');
-        }
+        function closeProjectModal() { document.getElementById('projectModal').classList.add('hidden'); }
 
-        function saveProject(e) {
+        async function saveProject(e) {
             e.preventDefault();
-            if (!currentUser || !currentUser.isAdmin) return;
+            const btn = document.getElementById('saveProjBtn');
+            btn.innerText = 'Сохранение...';
+            btn.disabled = true;
 
             const id = document.getElementById('editProjectId').value;
-            const title = document.getElementById('projTitle').value;
-            const stack = document.getElementById('projStack').value;
-            const desc = document.getElementById('projDesc').value;
-            const link = document.getElementById('projLink').value;
+            const payload = {
+                title: document.getElementById('projTitle').value.trim(),
+                stack: document.getElementById('projStack').value.trim(),
+                description: document.getElementById('projDesc').value.trim(),
+                link: document.getElementById('projLink').value.trim()
+            };
 
+            let res;
             if (id) {
-                let p = projects.find(x => x.id == id);
-                if (p) { p.title = title; p.stack = stack; p.desc = desc; p.link = link; }
+                res = await sb.from('projects').update(payload).eq('id', id);
             } else {
-                projects.push({ id: Date.now(), title, stack, desc, link });
+                res = await sb.from('projects').insert([payload]);
             }
 
-            localStorage.setItem('kodex_projects', JSON.stringify(projects));
+            btn.innerText = 'Опубликовать в облако';
+            btn.disabled = false;
+
+            if (res.error) {
+                alert('Ошибка сохранения: ' + res.error.message);
+                return;
+            }
+
             closeProjectModal();
-            renderAdminProjects();
-            renderCatalog();
+            await loadProjects();
         }
 
-        function deleteProject(id) {
-            if (!confirm('Удалить этот проект?')) return;
-            projects = projects.filter(x => x.id !== id);
-            localStorage.setItem('kodex_projects', JSON.stringify(projects));
-            renderAdminProjects();
-            renderCatalog();
+        async function deleteProject(id) {
+            if (!confirm('Удалить этот проект из облачной базы?')) return;
+            const { error } = await sb.from('projects').delete().eq('id', id);
+            if (error) {
+                alert('Ошибка удаления: ' + error.message);
+                return;
+            }
+            await loadProjects();
         }
 
-        function renderAdminProjects() {
+        function renderAdminList() {
             const list = document.getElementById('adminProjectsList');
             if (projects.length === 0) {
-                list.innerHTML = `<p class="text-zinc-500 font-mono text-sm">Нет добавленных проектов.</p>`;
+                list.innerHTML = `<p class="text-zinc-500 font-mono text-sm">В облаке пока нет проектов.</p>`;
                 return;
             }
 
             list.innerHTML = projects.map(p => `
-                <div class="flex items-center justify-between p-4 bg-zinc-900 border border-borderCol rounded-xl">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-zinc-900 border border-borderCol rounded-xl">
                     <div>
                         <h4 class="font-mono font-bold text-white">${escapeHtml(p.title)}</h4>
                         <span class="text-xs text-zinc-400 font-mono">${escapeHtml(p.stack)}</span>
                     </div>
                     <div class="flex items-center gap-2">
+                        <button onclick='openProjectModal(${JSON.stringify(p).replace(/'/g, "&#39;")})' class="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 px-3 py-1.5 rounded-lg text-xs font-mono transition border border-blue-500/20">Изменить</button>
                         <button onclick="deleteProject(${p.id})" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg text-xs font-mono transition border border-red-500/20">Удалить</button>
                     </div>
                 </div>
@@ -365,7 +361,8 @@
         }
 
         function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            if (!str) return '';
+            return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
         window.onload = init;
